@@ -24,4 +24,18 @@ export const workoutService = {
       })),
     }))
   },
+
+  async getSavedPlans(userId) {
+    const { data } = await api.get(`/api/user/${userId}/workout-plans`)
+    return data
+  },
+
+  async savePlan(userId, plan) {
+    const { data } = await api.post(`/api/user/${userId}/workout-plan`, plan)
+    return data
+  },
+
+  async deleteSavedPlan(planId, userId) {
+    await api.delete(`/api/workout-plan/${planId}?userId=${userId}`)
+  },
 }

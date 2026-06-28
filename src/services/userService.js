@@ -24,10 +24,33 @@ export const userService = {
     const formData = new FormData()
     formData.append('profilePicture', file)
     const { data } = await api.post(`/api/user/edit-profile-image/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
+    return data
+  },
+
+  async getWeeklySummary(id) {
+    const { data } = await api.get(`/api/user/${id}/analytics/weekly-calories`)
+    return data
+  },
+
+  async getMonthlyProgress(id) {
+    const { data } = await api.get(`/api/user/${id}/analytics/monthly-workouts`)
+    return data
+  },
+
+  async getPerformanceByExercise(id) {
+    const { data } = await api.get(`/api/user/${id}/analytics/performance-by-exercise`)
+    return data
+  },
+
+  async getMuscleDistribution(id) {
+    const { data } = await api.get(`/api/user/${id}/analytics/muscle-distribution`)
+    return data
+  },
+
+  async getWorkoutHistory(id) {
+    const { data } = await api.get(`/api/user/${id}/workout-history`)
     return data
   },
 }

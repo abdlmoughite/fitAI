@@ -87,8 +87,16 @@ export function AuthProvider({ children }) {
     return roles.includes(user.role)
   }, [user])
 
+  // Called after session completion with the updated user object from the backend
+  const refreshUser = useCallback((backendUser) => {
+    if (!backendUser) return
+    const mappedUser = mapBackendUser(backendUser)
+    localStorage.setItem('fitai-user', JSON.stringify(mappedUser))
+    setUser(mappedUser)
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile, hasRole, isAuthenticated: !!user, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile, hasRole, refreshUser, isAuthenticated: !!user, setUser }}>
       {children}
     </AuthContext.Provider>
   )

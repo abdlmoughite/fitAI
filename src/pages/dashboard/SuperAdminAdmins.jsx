@@ -36,7 +36,7 @@ export default function SuperAdminAdmins() {
   const handleCreate = async () => {
     if (!newAdmin.firstname || !newAdmin.email) return
     try {
-      const { data } = await api.post('/api/authentication/register', {
+      await api.post('/api/user/create-admin', {
         firstname: newAdmin.firstname,
         lastname: newAdmin.lastname,
         email: newAdmin.email,
