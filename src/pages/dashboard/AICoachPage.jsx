@@ -4,21 +4,47 @@ import ChatBubble from '../../components/dashboard/ChatBubble'
 import { quickReplies } from '../../data/mockData'
 import { icons } from '../../data/icons'
 import { aiCoachService } from '../../services/aiCoachService'
+import { useAuth } from '../../context/AuthContext'
 
-const INITIAL_MESSAGES = [
-  {
-    id: '1',
-    role: 'ai',
-    content: "Salut ! Je suis ton coach IA FitAI 💪 Pose-moi tes questions sur l'entraînement, la nutrition ou la récupération !",
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  },
-]
+const WELCOME_MESSAGE = {
+  id: 'welcome',
+  role: 'ai',
+  content: "Salut ! Je suis ton coach IA FitAI 💪 Pose-moi tes questions sur l'entraînement, la nutrition ou la récupération !",
+  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+}
+
+function historyToMessages(history) {
+  return history.flatMap((entry, i) => [
+    {
+      id: `h-user-${i}`,
+      role: 'user',
+      content: entry.userMessage,
+      timestamp: new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+    {
+      id: `h-ai-${i}`,
+      role: 'ai',
+      content: entry.aiResponse,
+      timestamp: new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  ])
+}
 
 export default function AICoachPage() {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES)
+  const { user } = useAuth()
+  const [messages, setMessages] = useState([WELCOME_MESSAGE])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
+
+  useEffect(() => {
+    if (!user?.id) return
+    aiCoachService.getHistory(user.id).then(history => {
+      if (history.length > 0) {
+        setMessages([WELCOME_MESSAGE, ...historyToMessages(history)])
+      }
+    }).catch(() => {})
+  }, [user?.id])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -39,7 +65,7 @@ export default function AICoachPage() {
     setLoading(true)
 
     try {
-      const responseText = await aiCoachService.chat(msg.trim())
+      const responseText = await aiCoachService.chat(msg.trim(), user?.id, user?.name)
       const aiMsg = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
